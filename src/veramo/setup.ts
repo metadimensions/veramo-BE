@@ -31,6 +31,12 @@ import { Entities, KeyStore, DIDStore, IDataStoreORM, PrivateKeyStore, migration
 // TypeORM is installed with `@veramo/data-store`
 import { DataSource } from 'typeorm'
 
+import { MessageHandler } from '@veramo/message-handler'
+import { DIDComm, DIDCommMessageHandler } from '@veramo/did-comm'
+import { DataStore } from '@veramo/data-store'
+import { JwtMessageHandler } from '@veramo/did-jwt'
+import {  W3cMessageHandler } from '@veramo/credential-w3c'
+
 // This will be the name for the local sqlite database for demo purposes
 const DATABASE_FILE = 'database.sqlite'
 
@@ -40,6 +46,8 @@ const INFURA_PROJECT_ID = '3586660d179141e3801c3895de1c2eba'
 // This will be the secret key for the KMS
 const KMS_SECRET_KEY =
   '11b574d316903ced6cc3f4787bbcc3047d9c72d1da4d83e36fe714ef785d10c1'
+
+
 
   const dbConnection = new DataSource({
     type: 'sqlite',
@@ -80,5 +88,15 @@ const KMS_SECRET_KEY =
         }),
       }),
       new CredentialPlugin(),
+      // new CredentialIssuer(),
+      new DIDComm(),
+      new DataStore(dbConnection),
+      new MessageHandler({
+        messageHandlers: [
+          new DIDCommMessageHandler(),
+          new JwtMessageHandler(),
+          new W3cMessageHandler(),
+        ],
+      }),
     ],
   })
